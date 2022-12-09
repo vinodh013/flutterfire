@@ -15,8 +15,10 @@ import 'package:mockito/mockito.dart';
 
 import 'utils.dart';
 
-void main() {
+Future<void> main() async {
   const labels = DefaultLocalizations();
+
+  await prepareTestEnv();
 
   group('UniversalEmailSignInScreen', () {
     testWidgets('validates email', (tester) async {

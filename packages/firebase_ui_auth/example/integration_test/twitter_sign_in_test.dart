@@ -9,31 +9,33 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
 import 'package:firebase_ui_oauth/firebase_ui_oauth.dart';
-import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_ui_oauth_twitter/firebase_ui_oauth_twitter.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twitter_login/twitter_login.dart';
+import 'package:twitter_login/entity/auth_result.dart' as twe;
 
 import 'utils.dart';
 
-void main() async {
-  late GoogleProvider provider = GoogleProvider(
-    clientId: 'clientId',
-    redirectUri: 'redirectUri',
-    scopes: const ['scope1', 'scope2'],
+Future<void> main() async {
+  late TwitterProvider provider = TwitterProvider(
+    apiKey: 'apiKey',
+    apiSecretKey: 'apiSecretKey',
   );
 
+  await prepareTestEnv();
+
   setUp(() {
-    provider.provider = MockGoogleSignIn();
+    provider.provider = MockTwitterLogin();
   });
 
   const labels = DefaultLocalizations();
 
   group(
-    'Sign in with Google button',
+    'Sign in with Twitter button',
     () {
       testWidgets('has a correct button label', (tester) async {
         await render(tester, OAuthProviderButton(provider: provider));
-        expect(find.text(labels.signInWithGoogleButtonText), findsOneWidget);
+        expect(find.text(labels.signInWithTwitterButtonText), findsOneWidget);
       });
 
       testWidgets(
@@ -48,7 +50,7 @@ void main() async {
           await tester.tap(button);
 
           await tester.pumpAndSettle();
-          verify(provider.provider.signIn()).called(1);
+          verify(provider.provider.login()).called(1);
 
           expect(true, isTrue);
         },
@@ -62,10 +64,10 @@ void main() async {
             OAuthProviderButton(provider: provider),
           );
 
-          when(provider.provider.signIn()).thenAnswer(
+          when(provider.provider.login()).thenAnswer(
             (realInvocation) async {
               await Future.delayed(const Duration(milliseconds: 50));
-              return MockGoogleSignInAccount();
+              return MockAuthResult();
             },
           );
 
@@ -92,20 +94,6 @@ void main() async {
         expect(user.displayName, 'Test User');
         expect(user.email, 'test@test.com');
       });
-
-      testWidgets('works standalone', (tester) async {
-        await render(
-          tester,
-          const GoogleSignInButton(
-            loadingIndicator: CircularProgressIndicator(),
-            clientId: 'test',
-          ),
-        );
-
-        final button = find.byType(GoogleSignInButton);
-        await tester.tap(button);
-        await tester.pump();
-      });
     },
     skip: !provider.supportsPlatform(defaultTargetPlatform),
   );
@@ -121,25 +109,25 @@ void main() async {
 const _jwt =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTUxNjIzOTAyMn0.m5qYto_Vs5ELTURC8rkD-JAJuoosdQZeuUZ_qFrEiaE';
 
-class MockAuthentication extends Mock implements GoogleSignInAuthentication {
+class MockAuthResult extends Mock implements twe.AuthResult {
   @override
-  final String accessToken = _jwt;
+  TwitterLoginStatus? get status => TwitterLoginStatus.loggedIn;
+  @override
+  String? get authToken => _jwt;
+  @override
+  String? get authTokenSecret => 'secret';
 }
 
-// ignore: avoid_implementing_value_types, must_be_immutable
-class MockGoogleSignInAccount extends Mock implements GoogleSignInAccount {
+class MockTwitterLogin extends Mock implements TwitterLogin {
   @override
-  Future<GoogleSignInAuthentication> get authentication async =>
-      MockAuthentication();
-}
-
-class MockGoogleSignIn extends Mock implements GoogleSignIn {
-  @override
-  Future<GoogleSignInAccount?> signIn() async {
+  Future<twe.AuthResult> login({bool? forceLogin}) async {
     return super.noSuchMethod(
-      Invocation.method(#signIn, []),
-      returnValue: MockGoogleSignInAccount(),
-      returnValueForMissingStub: MockGoogleSignInAccount(),
+      Invocation.method(
+        #signIn,
+        [],
+      ),
+      returnValue: MockAuthResult(),
+      returnValueForMissingStub: MockAuthResult(),
     );
   }
 }

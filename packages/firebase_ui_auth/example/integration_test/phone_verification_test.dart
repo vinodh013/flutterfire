@@ -11,7 +11,7 @@ import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
 
 import 'utils.dart';
 
-Future<void> sendSMS(WidgetTester tester, String phoneNumber) async {
+Future<void> enterPhoneNumber(WidgetTester tester, String phoneNumber) async {
   await tester.pump();
 
   final phoneInput = find.byType(TextField).at(1);
@@ -21,8 +21,9 @@ Future<void> sendSMS(WidgetTester tester, String phoneNumber) async {
   await tester.pumpAndSettle();
 }
 
-void main() {
+Future<void> main() async {
   const labels = DefaultLocalizations();
+  await prepareTestEnv();
 
   group('PhoneInputScreen', () {
     testWidgets(
@@ -101,7 +102,7 @@ void main() {
           ),
         );
 
-        await sendSMS(tester, '123456789');
+        await enterPhoneNumber(tester, '123456789');
 
         await completer.future;
 
@@ -114,7 +115,7 @@ void main() {
       'opens sms verification screen when code is requested',
       (tester) async {
         await render(tester, const PhoneInputScreen());
-        await sendSMS(tester, '123456789');
+        await enterPhoneNumber(tester, '123456789');
 
         expect(find.text(labels.enterSMSCodeText), findsOneWidget);
       },
@@ -124,7 +125,7 @@ void main() {
   group('SMSCodeInputScreen', () {
     testWidgets('allows to go back to phone input screen', (tester) async {
       await render(tester, const PhoneInputScreen());
-      await sendSMS(tester, '123456789');
+      await enterPhoneNumber(tester, '123456789');
 
       final button = find.text(labels.goBackButtonLabel);
       expect(button, findsOneWidget);
@@ -141,7 +142,7 @@ void main() {
           tester,
           const PhoneInputScreen(),
         );
-        await sendSMS(tester, '234567890');
+        await enterPhoneNumber(tester, '234567890');
 
         final smsCodeInput = find.byType(SMSCodeInput);
         expect(smsCodeInput, findsOneWidget);
@@ -180,7 +181,7 @@ void main() {
             child: const PhoneInputScreen(),
           ),
         );
-        await sendSMS(tester, '234567890');
+        await enterPhoneNumber(tester, '234567890');
 
         final smsCodeInput = find.byType(SMSCodeInput);
         expect(smsCodeInput, findsOneWidget);

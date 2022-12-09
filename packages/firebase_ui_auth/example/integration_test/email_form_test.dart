@@ -10,8 +10,10 @@ import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
 
 import 'utils.dart';
 
-void main() {
+Future<void> main() async {
   const labels = DefaultLocalizations();
+
+  await prepareTestEnv();
 
   group('EmailForm', () {
     testWidgets('validates email', (tester) async {

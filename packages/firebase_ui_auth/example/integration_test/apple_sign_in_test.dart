@@ -22,6 +22,8 @@ void main() async {
 
   const labels = DefaultLocalizations();
 
+  await prepareTestEnv();
+
   group(
     'Sign in with Apple button',
     () {
@@ -111,7 +113,10 @@ void main() async {
         expect(user.email, 'test@test.com');
       });
     },
-    skip: !provider.supportsPlatform(defaultTargetPlatform),
+    skip: provider.supportsPlatform(defaultTargetPlatform)
+        ? false
+        : 'Sign in with Apple is not supported on'
+            ' ${describeEnum(defaultTargetPlatform)}',
   );
 
   group('AppleProvider', () {

@@ -10,8 +10,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:integration_test/integration_test.dart';
 
 import 'firebase_options.dart';
+
+Future<void> prepareTestEnv() async {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    await FirebaseAuth.instance.useAuthEmulator(testEmulatorHost, 9099);
+  });
+
+  tearDown(() async {
+    await deleteAllAccounts();
+  });
+}
 
 String get testEmulatorHost {
   if (defaultTargetPlatform == TargetPlatform.android && !kIsWeb) {
@@ -24,11 +40,6 @@ bool get isMobile {
   return !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.android);
-}
-
-Future<void> prepare() async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await FirebaseAuth.instance.useAuthEmulator(testEmulatorHost, 9099);
 }
 
 Future<void> render(WidgetTester tester, Widget widget) async {

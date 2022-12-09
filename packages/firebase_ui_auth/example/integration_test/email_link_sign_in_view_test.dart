@@ -22,8 +22,10 @@ final emailLinkProvider = EmailLinkAuthProvider(
   actionCodeSettings: actionCodeSettings,
 );
 
-void main() {
+Future<void> main() async {
   const labels = DefaultLocalizations();
+
+  await prepareTestEnv();
 
   group('EmailLinkSignInView', () {
     testWidgets('validates email', (tester) async {
@@ -44,9 +46,7 @@ void main() {
     testWidgets('sends a link to an email', (tester) async {
       await render(
         tester,
-        EmailLinkSignInView(
-          provider: emailLinkProvider,
-        ),
+        EmailLinkSignInView(provider: emailLinkProvider),
       );
 
       final input = find.byType(TextFormField);

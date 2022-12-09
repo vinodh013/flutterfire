@@ -11,7 +11,11 @@ import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 import 'package:mockito/mockito.dart';
 
-void main() {
+import 'utils.dart';
+
+Future<void> main() async {
+  await prepareTestEnv();
+
   group(
     'Reauthenticate dialog',
     () {
