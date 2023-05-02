@@ -2,6 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:firebase_ui_auth/firebase_ui_auth_platform_interface.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
 import 'package:flutter/material.dart';
@@ -138,7 +139,7 @@ class PhoneInputState extends State<PhoneInput> {
   // ignore: library_private_types_in_public_api
   _CountryCodeItem? countryCodeItem;
 
-  void _onSubmitted(_) {
+  void _onSubmitted(String? _) {
     if (formKey.currentState!.validate()) {
       widget.onSubmit?.call(phoneNumber);
     }
@@ -147,6 +148,8 @@ class PhoneInputState extends State<PhoneInput> {
   @override
   void initState() {
     _setCountry(countryCode: widget.initialCountryCode);
+    FirebaseUiAuthPlatform.instance.getPhoneNumber().then(_maybeSetPhoneNumber);
+
     super.initState();
   }
 
@@ -176,6 +179,16 @@ class PhoneInputState extends State<PhoneInput> {
 
     if (updateCountryInput) {
       countryController.text = countryCodeItem?.phoneCode ?? '';
+    }
+  }
+
+  void _maybeSetPhoneNumber(Map<String, dynamic>? value) {
+    if (value == null) return;
+
+    if (mounted) {
+      _setCountry(phoneCode: value['countryCode'].toString());
+      numberController.text = value['nationalNumber'].toString();
+      _onSubmitted(numberController.text);
     }
   }
 
