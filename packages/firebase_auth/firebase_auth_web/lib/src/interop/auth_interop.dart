@@ -553,6 +553,7 @@ abstract class AuthError {
   external set tenantId(String s);
   external String get phoneNumber;
   external set phoneNumber(String s);
+  external dynamic get customData;
 }
 
 @JS()
@@ -710,7 +711,7 @@ class MultiFactorAssertionJsImpl {
 /// https://firebase.google.com/docs/reference/js/auth.multifactorerror
 @JS('Error')
 @anonymous
-class MultiFactorError extends AuthError {
+class MultiFactorError {
   external dynamic get customData;
 }
 

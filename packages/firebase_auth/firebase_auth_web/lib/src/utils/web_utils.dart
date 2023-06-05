@@ -22,6 +22,12 @@ FirebaseAuthException getFirebaseAuthException(
   Object exception, [
   auth_interop.Auth? auth,
 ]) {
+  // Exception coming through has "customData" property on Flutter < 3.10. It is an instance of `LegacyJavaScriptObject`.
+  // Exception does not have "customData" property on Flutter >= 3.10. It will exception here as it is an instance of `NativeError`
+  dynamic e = exception;
+  print('CUSTOM DATA: ${e.customData}');
+
+
   if (exception is! core_interop.FirebaseError) {
     return FirebaseAuthException(
       code: 'unknown',

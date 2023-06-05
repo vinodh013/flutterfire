@@ -53,40 +53,21 @@ class AuthExampleApp extends StatelessWidget {
           builder: (context, constraints) {
             return Row(
               children: [
-                Visibility(
-                  visible: constraints.maxWidth >= 1200,
-                  child: Expanded(
-                    child: Container(
-                      height: double.infinity,
-                      color: Theme.of(context).colorScheme.primary,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Firebase Auth Desktop',
-                              style: Theme.of(context).textTheme.headlineMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: constraints.maxWidth >= 1200
-                      ? constraints.maxWidth / 2
-                      : constraints.maxWidth,
-                  child: StreamBuilder<User?>(
-                    stream: auth.authStateChanges(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return const ProfilePage();
+                ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        final user = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: "non-existent-email@email.com", password: "QowErYvB321");
+
+                      } on FirebaseAuthException catch (e) {
+                        print('MESSAGE: ${e.message}');
+                        print('CODE: ${e.code}');
+                        rethrow;
                       }
-                      return const AuthGate();
                     },
-                  ),
-                ),
+                    child: const Text(
+                      'press for exception',
+                    )),
               ],
             );
           },
