@@ -711,7 +711,7 @@ class MultiFactorAssertionJsImpl {
 /// https://firebase.google.com/docs/reference/js/auth.multifactorerror
 @JS('Error')
 @anonymous
-class MultiFactorError {
+class MultiFactorError extends AuthError {
   external dynamic get customData;
 }
 
