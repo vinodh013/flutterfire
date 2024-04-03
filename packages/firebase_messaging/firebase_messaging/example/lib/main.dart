@@ -291,10 +291,20 @@ class _Application extends State<Application> {
         ],
       ),
       floatingActionButton: Builder(
-        builder: (context) => FloatingActionButton(
-          onPressed: sendPushMessage,
-          backgroundColor: Colors.white,
-          child: const Icon(Icons.send),
+        builder: (context) => Row(
+          children: [
+            FloatingActionButton(
+              onPressed: sendPushMessage,
+              backgroundColor: Colors.white,
+              child: const Icon(Icons.send),
+            ),
+            ElevatedButton(onPressed: () async {
+              await FirebaseMessaging.instance.deleteToken();
+              print('Old token: $_token');
+              final String? fcmToken = await FirebaseMessaging.instance.getToken();
+              print('New token: $fcmToken');
+            }, child: const Text("renew"))
+          ],
         ),
       ),
       body: SingleChildScrollView(
