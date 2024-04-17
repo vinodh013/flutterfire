@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
+import 'package:firebase_database/ui/firebase_list.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 
@@ -202,6 +203,10 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: _incrementAsTransaction,
             child: const Text('Increment as transaction'),
           ),
+          ElevatedButton(
+            onPressed: _submit,
+            child: const Text('Test Await'),
+          ),
           ListTile(
             leading: Checkbox(
               onChanged: _setAnchorToBottom,
@@ -237,4 +242,42 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  Future<List<String>> loadItems() async {
+    final List<String> items = [];
+
+    String path = '/messages';
+    Query resp = FirebaseDatabase.instance.ref().child(path);
+
+    Completer c = new Completer();
+    FirebaseList(
+      query: resp,
+      onChildAdded: (i, element) {
+        print(element.value);
+        Map<dynamic, dynamic> map = element.value as dynamic;
+        items.add(map['Hello']);
+      },
+      onValue: (snapshot) {
+        c.complete();
+      },
+      onError: (e) => print(e.message),
+    );
+
+    await resp.once().then((snapshot) {
+      print('snapshot: ${snapshot.type} ${snapshot.snapshot.value.toString()}');
+      print('${items.length} Items were loaded');
+    });
+
+    await c.future;
+
+    return items;
+  }
+
+  Future<void> _submit() async {
+    List<String> itemsList = [];
+    itemsList = await loadItems();
+    int _sumQty = itemsList.fold(0, (a, b) => a + int.parse(b.split(' ')[1]));
+    print('$_sumQty was the sum of quantities');
+  }
+
 }
