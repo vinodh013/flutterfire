@@ -64,6 +64,7 @@ class AuthGate extends StatefulWidget {
   // ignore: public_member_api_docs
   const AuthGate({Key? key}) : super(key: key);
   static String? appleAuthorizationCode;
+
   @override
   State<StatefulWidget> createState() => _AuthGateState();
 }
@@ -142,199 +143,223 @@ class _AuthGateState extends State<AuthGate> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: SafeArea(
-                  child: Form(
-                    key: formKey,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 400),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Visibility(
-                            visible: error.isNotEmpty,
-                            child: MaterialBanner(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.error,
-                              content: SelectableText(error),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      error = '';
-                                    });
-                                  },
-                                  child: const Text(
-                                    'dismiss',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ],
-                              contentTextStyle:
-                                  const TextStyle(color: Colors.white),
-                              padding: const EdgeInsets.all(10),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          if (mode != AuthMode.phone)
-                            Column(
-                              children: [
-                                TextFormField(
-                                  controller: emailController,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Email',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  keyboardType: TextInputType.emailAddress,
-                                  autofillHints: const [AutofillHints.email],
-                                  validator: (value) =>
-                                      value != null && value.isNotEmpty
-                                          ? null
-                                          : 'Required',
-                                ),
-                                const SizedBox(height: 20),
-                                TextFormField(
-                                  controller: passwordController,
-                                  obscureText: true,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Password',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  validator: (value) =>
-                                      value != null && value.isNotEmpty
-                                          ? null
-                                          : 'Required',
-                                ),
-                              ],
-                            ),
-                          if (mode == AuthMode.phone)
-                            TextFormField(
-                              controller: phoneController,
-                              decoration: const InputDecoration(
-                                hintText: '+12345678910',
-                                labelText: 'Phone number',
-                                border: OutlineInputBorder(),
+                  child: Column(
+                    children: [
+                      ElevatedButton(
+                          onPressed: () {
+                            FirebaseAuth.instance.sendSignInLinkToEmail(
+                              email: 'tarek@invertase.io',
+                              actionCodeSettings: ActionCodeSettings(
+                                url: 'https://flutterfire-e2e-tests-2.web.app',
+                                handleCodeInApp: true,
                               ),
-                              validator: (value) =>
-                                  value != null && value.isNotEmpty
-                                      ? null
-                                      : 'Required',
-                            ),
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: ElevatedButton(
-                              onPressed: isLoading
-                                  ? null
-                                  : () => _handleMultiFactorException(
-                                        _emailAndPassword,
-                                      ),
-                              child: isLoading
-                                  ? const CircularProgressIndicator.adaptive()
-                                  : Text(mode.label),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: _resetPassword,
-                            child: const Text('Forgot password?'),
-                          ),
-                          ...authButtons.keys
-                              .map(
-                                (button) => Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 5),
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 200),
-                                    child: isLoading
-                                        ? Container(
-                                            color: Colors.grey[200],
-                                            height: 50,
-                                            width: double.infinity,
-                                          )
-                                        : SizedBox(
-                                            width: double.infinity,
-                                            height: 50,
-                                            child: SignInButton(
-                                              button,
-                                              onPressed: authButtons[button]!,
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: OutlinedButton(
-                              onPressed: isLoading
-                                  ? null
-                                  : () {
-                                      if (mode != AuthMode.phone) {
+                            );
+                          },
+                          child: const Text('Test')),
+                      Form(
+                        key: formKey,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 400),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Visibility(
+                                visible: error.isNotEmpty,
+                                child: MaterialBanner(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.error,
+                                  content: SelectableText(error),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
                                         setState(() {
-                                          mode = AuthMode.phone;
-                                        });
-                                      } else {
-                                        setState(() {
-                                          mode = AuthMode.login;
-                                        });
-                                      }
-                                    },
-                              child: isLoading
-                                  ? const CircularProgressIndicator.adaptive()
-                                  : Text(
-                                      mode != AuthMode.phone
-                                          ? 'Sign in with Phone Number'
-                                          : 'Sign in with Email and Password',
-                                    ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          if (mode != AuthMode.phone)
-                            RichText(
-                              text: TextSpan(
-                                style: Theme.of(context).textTheme.bodyLarge,
-                                children: [
-                                  TextSpan(
-                                    text: mode == AuthMode.login
-                                        ? "Don't have an account? "
-                                        : 'You have an account? ',
-                                  ),
-                                  TextSpan(
-                                    text: mode == AuthMode.login
-                                        ? 'Register now'
-                                        : 'Click to login',
-                                    style: const TextStyle(color: Colors.blue),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        setState(() {
-                                          mode = mode == AuthMode.login
-                                              ? AuthMode.register
-                                              : AuthMode.login;
+                                          error = '';
                                         });
                                       },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          const SizedBox(height: 10),
-                          RichText(
-                            text: TextSpan(
-                              style: Theme.of(context).textTheme.bodyLarge,
-                              children: [
-                                const TextSpan(text: 'Or '),
-                                TextSpan(
-                                  text: 'continue as guest',
-                                  style: const TextStyle(color: Colors.blue),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = _anonymousAuth,
+                                      child: const Text(
+                                        'dismiss',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ],
+                                  contentTextStyle:
+                                      const TextStyle(color: Colors.white),
+                                  padding: const EdgeInsets.all(10),
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 20),
+                              if (mode != AuthMode.phone)
+                                Column(
+                                  children: [
+                                    TextFormField(
+                                      controller: emailController,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Email',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      keyboardType: TextInputType.emailAddress,
+                                      autofillHints: const [
+                                        AutofillHints.email
+                                      ],
+                                      validator: (value) =>
+                                          value != null && value.isNotEmpty
+                                              ? null
+                                              : 'Required',
+                                    ),
+                                    const SizedBox(height: 20),
+                                    TextFormField(
+                                      controller: passwordController,
+                                      obscureText: true,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Password',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      validator: (value) =>
+                                          value != null && value.isNotEmpty
+                                              ? null
+                                              : 'Required',
+                                    ),
+                                  ],
+                                ),
+                              if (mode == AuthMode.phone)
+                                TextFormField(
+                                  controller: phoneController,
+                                  decoration: const InputDecoration(
+                                    hintText: '+12345678910',
+                                    labelText: 'Phone number',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  validator: (value) =>
+                                      value != null && value.isNotEmpty
+                                          ? null
+                                          : 'Required',
+                                ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: ElevatedButton(
+                                  onPressed: isLoading
+                                      ? null
+                                      : () => _handleMultiFactorException(
+                                            _emailAndPassword,
+                                          ),
+                                  child: isLoading
+                                      ? const CircularProgressIndicator
+                                          .adaptive()
+                                      : Text(mode.label),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: _resetPassword,
+                                child: const Text('Forgot password?'),
+                              ),
+                              ...authButtons.keys
+                                  .map(
+                                    (button) => Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 5),
+                                      child: AnimatedSwitcher(
+                                        duration:
+                                            const Duration(milliseconds: 200),
+                                        child: isLoading
+                                            ? Container(
+                                                color: Colors.grey[200],
+                                                height: 50,
+                                                width: double.infinity,
+                                              )
+                                            : SizedBox(
+                                                width: double.infinity,
+                                                height: 50,
+                                                child: SignInButton(
+                                                  button,
+                                                  onPressed:
+                                                      authButtons[button]!,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: OutlinedButton(
+                                  onPressed: isLoading
+                                      ? null
+                                      : () {
+                                          if (mode != AuthMode.phone) {
+                                            setState(() {
+                                              mode = AuthMode.phone;
+                                            });
+                                          } else {
+                                            setState(() {
+                                              mode = AuthMode.login;
+                                            });
+                                          }
+                                        },
+                                  child: isLoading
+                                      ? const CircularProgressIndicator
+                                          .adaptive()
+                                      : Text(
+                                          mode != AuthMode.phone
+                                              ? 'Sign in with Phone Number'
+                                              : 'Sign in with Email and Password',
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              if (mode != AuthMode.phone)
+                                RichText(
+                                  text: TextSpan(
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                    children: [
+                                      TextSpan(
+                                        text: mode == AuthMode.login
+                                            ? "Don't have an account? "
+                                            : 'You have an account? ',
+                                      ),
+                                      TextSpan(
+                                        text: mode == AuthMode.login
+                                            ? 'Register now'
+                                            : 'Click to login',
+                                        style:
+                                            const TextStyle(color: Colors.blue),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            setState(() {
+                                              mode = mode == AuthMode.login
+                                                  ? AuthMode.register
+                                                  : AuthMode.login;
+                                            });
+                                          },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              const SizedBox(height: 10),
+                              RichText(
+                                text: TextSpan(
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                  children: [
+                                    const TextSpan(text: 'Or '),
+                                    TextSpan(
+                                      text: 'continue as guest',
+                                      style:
+                                          const TextStyle(color: Colors.blue),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = _anonymousAuth,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),

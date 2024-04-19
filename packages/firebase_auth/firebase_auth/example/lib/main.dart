@@ -30,8 +30,8 @@ Future<void> main() async {
 
   // We store the app and auth to make testing with a named instance easier.
   app = await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+      // options: DefaultFirebaseOptions.currentPlatform,
+      );
   auth = FirebaseAuth.instanceFor(app: app);
 
   if (shouldUseFirebaseEmulator) {

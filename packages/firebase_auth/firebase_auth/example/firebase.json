@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"ios":{"default":{"projectId":"flutterfire-e2e-tests-2","appId":"1:866672724757:ios:2feccb6f224c7a9c19f71c","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"flutterfire-e2e-tests-2","configurations":{"ios":"1:866672724757:ios:2feccb6f224c7a9c19f71c"}}}}}}
