@@ -51,6 +51,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String a = '';
+  String b = '';
   late DatabaseReference _counterRef;
   late DatabaseReference _messagesRef;
   late StreamSubscription<DatabaseEvent> _counterSubscription;
@@ -129,6 +131,26 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Future<void> test() async {
+    final database = FirebaseDatabase.instance;
+    int someNum = 0;
+    _messagesRef = database.ref('messages');
+    final updates = {'${_messagesRef.path}/$someNum': null};
+    setState(() {
+      b = updates.toString();
+    });
+    await FirebaseDatabase.instance.ref().update(updates);
+
+    //This is only to show in the database that _messagesRef.path is incorrect
+    final path = FirebaseDatabase.instance.ref('tryToDelete');
+    setState(() {
+      a = path.path;
+    });
+    print(path.path);
+
+    await path.push().set('${_messagesRef.path}/$someNum');
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -186,6 +208,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: [
+          ElevatedButton(onPressed: test, child: const Text('Test')),
+          Text("Path:" + a),
+          Text("Updates:" + b),
           Flexible(
             child: Center(
               child: _error == null
