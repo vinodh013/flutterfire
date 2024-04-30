@@ -64,6 +64,7 @@ class AuthGate extends StatefulWidget {
   // ignore: public_member_api_docs
   const AuthGate({Key? key}) : super(key: key);
   static String? appleAuthorizationCode;
+
   @override
   State<StatefulWidget> createState() => _AuthGateState();
 }
@@ -571,10 +572,26 @@ class _AuthGateState extends State<AuthGate> {
       // Get access token
       final AccessToken accessToken = result.accessToken!;
 
+      final AuthCredential credential;
+
+      switch (accessToken.type) {
+        case AccessTokenType.classic:
+          final token = accessToken as ClassicToken;
+          credential = FacebookAuthProvider.credential(token.authenticationToken!,);
+          break;
+        case AccessTokenType.limited:
+          final token = accessToken as LimitedToken;
+          credential = OAuthCredential(
+            providerId: 'facebook.com',
+            signInMethod: 'oauth',
+            idToken: token.tokenString,
+            rawNonce: token.nonce,
+          );
+          break;
+      }
+
       // Login with token
-      await auth.signInWithCredential(
-        FacebookAuthProvider.credential(accessToken.token),
-      );
+      await auth.signInWithCredential(credential);
     } else {
       print('Facebook login did not succeed');
       print(result.status);
