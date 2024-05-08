@@ -14,7 +14,7 @@ import 'firebase_options.dart';
 
 /// Requires that a Firestore emulator is running locally.
 /// See https://firebase.flutter.dev/docs/firestore/usage#emulator-usage
-bool shouldUseFirestoreEmulator = true;
+bool shouldUseFirestoreEmulator = false;
 
 Future<Uint8List> loadBundleSetup(int number) async {
   // endpoint serves a bundle with 3 documents each containing
@@ -36,7 +36,48 @@ Future<void> main() async {
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
 
-  runApp(FirestoreExampleApp());
+  runApp(TheApp());
+}
+
+
+class TheApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: ElevatedButton(
+            onPressed: () async {
+              try {
+                // Update operation
+                FirebaseFirestore firestore = FirebaseFirestore.instance;
+                DocumentReference documentReference =
+                firestore.collection('test_10153').doc('counter');
+                final doc = await documentReference.get();
+                if (!doc.exists) {
+                  await documentReference.set(<String, dynamic>{});
+                }
+                await documentReference.update({'counter': FieldValue.increment(1)});
+
+                // Attempt to fetch and deserialize the updated document
+                DocumentSnapshot snapshot = await documentReference.get();
+                Map<dynamic, dynamic>? data = snapshot.data() as Map<dynamic, dynamic>?;
+                if (data != null) {
+                  // Directly deserialize 'counter' field within fromFirestore
+                  int? counter = data['counter'] as int?;
+                  print('Deserialized counter value: $counter');
+                }
+              } on Exception catch (error, stackTrace) {
+                debugPrint(error.toString());
+                debugPrintStack(stackTrace: stackTrace);
+              }
+            },
+            child: Text('Increment Counter and Deserialize'),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// A reference to the list of movies.
