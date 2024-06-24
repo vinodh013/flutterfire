@@ -475,10 +475,11 @@ class _AuthGateState extends State<AuthGate> {
   Future<void> _emailAndPassword() async {
     if (formKey.currentState?.validate() ?? false) {
       if (mode == AuthMode.login) {
-        await auth.signInWithEmailAndPassword(
+        final c = await auth.signInWithEmailAndPassword(
           email: emailController.text,
           password: passwordController.text,
         );
+        print(c.additionalUserInfo!.providerId);
       } else if (mode == AuthMode.register) {
         await auth.createUserWithEmailAndPassword(
           email: emailController.text,
