@@ -64,6 +64,7 @@ class AuthGate extends StatefulWidget {
   // ignore: public_member_api_docs
   const AuthGate({Key? key}) : super(key: key);
   static String? appleAuthorizationCode;
+
   @override
   State<StatefulWidget> createState() => _AuthGateState();
 }
@@ -233,6 +234,24 @@ class _AuthGateState extends State<AuthGate> {
                                   ? const CircularProgressIndicator.adaptive()
                                   : Text(mode.label),
                             ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              try {
+                                await FirebaseAuth.instance.sendSignInLinkToEmail(
+                                  email: emailController.text,
+                                  actionCodeSettings: ActionCodeSettings(
+                                    url: 'https://flutterfire-e2e-tests.firebaseapp.com/__/auth/',
+                                    handleCodeInApp: true,
+                                    androidPackageName: 'io.flutter.plugins.firebase.auth'
+                                  ),
+                                );
+                              } catch (e, stk) {
+                                debugPrintStack(label: e.toString(), stackTrace: stk);
+
+                              }
+                            },
+                            child: const Text('Send Email Link'),
                           ),
                           TextButton(
                             onPressed: _resetPassword,
