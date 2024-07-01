@@ -563,6 +563,19 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future<void> _signInWithFacebook() async {
+    if (kIsWeb) {
+      FacebookAuthProvider facebookProvider = FacebookAuthProvider();
+
+      facebookProvider.addScope('email');
+      facebookProvider.setCustomParameters({
+        'display': 'popup',
+      });
+
+      // Once signed in, return the UserCredential
+      await FirebaseAuth.instance.signInWithPopup(facebookProvider);
+      return;
+    }
+
     // Trigger the authentication flow
     // by default we request the email and the public profile
     final LoginResult result = await FacebookAuth.instance.login();
