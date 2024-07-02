@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 
 import 'firebase_options.dart';
 import 'save_as/save_as.dart';
@@ -20,16 +21,16 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  if (defaultTargetPlatform != TargetPlatform.windows) {
-    // window currently don't support storage emulator
-    final emulatorHost =
-        (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
-            ? '10.0.2.2'
-            : 'localhost';
-
-    await FirebaseStorage.instance.useStorageEmulator(emulatorHost, 9199);
-  }
+  //
+  // if (defaultTargetPlatform != TargetPlatform.windows) {
+  //   // window currently don't support storage emulator
+  //   final emulatorHost =
+  //       (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
+  //           ? '10.0.2.2'
+  //           : 'localhost';
+  //
+  //   await FirebaseStorage.instance.useStorageEmulator(emulatorHost, 9199);
+  // }
 
   runApp(StorageExampleApp());
 }
@@ -82,6 +83,9 @@ class _TaskManager extends State<TaskManager> {
 
   /// The user selects a file, and the task is added to the list.
   Future<UploadTask?> uploadFile(XFile? file) async {
+    FirebaseStorage.instance.setMaxUploadRetryTime(const Duration(minutes: 1));
+    FirebaseStorage.instance.setMaxOperationRetryTime(const Duration(minutes: 1));
+    FirebaseStorage.instance.setMaxDownloadRetryTime(const Duration(minutes: 1));
     if (file == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -144,7 +148,8 @@ class _TaskManager extends State<TaskManager> {
         });
         break;
       case UploadType.file:
-        final file = await ImagePicker().pickImage(source: ImageSource.gallery);
+        // final file = await ImagePicker().pickImage(source: ImageSource.gallery);
+        final file = (await FilePicker.platform.pickFiles())?.xFiles.single;
         UploadTask? task = await uploadFile(file);
 
         if (task != null) {
