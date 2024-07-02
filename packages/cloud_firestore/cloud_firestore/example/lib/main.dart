@@ -14,7 +14,7 @@ import 'firebase_options.dart';
 
 /// Requires that a Firestore emulator is running locally.
 /// See https://firebase.flutter.dev/docs/firestore/usage#emulator-usage
-bool shouldUseFirestoreEmulator = true;
+bool shouldUseFirestoreEmulator = false;
 
 Future<Uint8List> loadBundleSetup(int number) async {
   // endpoint serves a bundle with 3 documents each containing
@@ -34,6 +34,24 @@ Future<void> main() async {
   );
   if (shouldUseFirestoreEmulator) {
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
+  }
+
+
+  // test stream
+  try {
+    FirebaseFirestore.instance.doc('/flutter-tests/yolo').snapshots().listen((event) {
+      print('Stream: flutter-tests: ${event.data()}');
+    });
+
+    // now test future
+    unawaited(
+      FirebaseFirestore.instance.doc('/flutter-tests/yolo').get().then((event) {
+        print('Future: flutter-tests: ${event.data()}');
+      }),
+    );
+  } catch (e, stk) {
+    print('Error: $e');
+    debugPrintStack(stackTrace: stk);
   }
 
   runApp(FirestoreExampleApp());
