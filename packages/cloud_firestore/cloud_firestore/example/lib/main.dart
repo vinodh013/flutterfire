@@ -91,8 +91,27 @@ class FirestoreExampleApp extends StatelessWidget {
     return MaterialApp(
       title: 'Firestore Example App',
       theme: ThemeData.dark(),
-      home: const Scaffold(
-        body: Center(child: FilmList()),
+      home: Scaffold(
+        body: Center(
+          child: Column(
+            children: [
+              ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      var snap = await FirebaseFirestore.instance
+                          .collection('flutter-tests')
+                          .limit(24)
+                          .get();
+                      print('result ${snap.length}');
+                    } catch (e) {
+                      print('error ${e}');
+                    }
+                  },
+                  child: const Text('Test')),
+              const Expanded(child: FilmList()),
+            ],
+          ),
+        ),
       ),
     );
   }
