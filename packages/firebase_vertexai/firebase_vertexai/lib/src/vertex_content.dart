@@ -54,6 +54,10 @@ final class Content {
   static Content functionResponses(Iterable<FunctionResponse> responses) =>
       Content('function', responses.toList());
 
+  /// Return a [Content] with multiple [FunctionResponse].
+  static Content functionResponses(Iterable<FunctionResponse> responses) =>
+      Content('function', responses.toList());
+
   /// Return a [Content] with [TextPart] of system instruction.
   static Content system(String instructions) =>
       Content('system', [TextPart(instructions)]);
